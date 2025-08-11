@@ -33,6 +33,10 @@ pip install -r requirements.txt
 
 ### Running the Demo
 
+**🎮 Easy Mode (No API Keys Required)**
+
+The project works perfectly in mock mode for learning and testing:
+
 1. **Start Node 1** (in terminal 1):
 ```bash
 python examples/nft_mint_intent_demo.py --port 4001 --role coordinator
@@ -45,12 +49,22 @@ python examples/nft_mint_intent_demo.py --port 4002 --role participant --connect
 
 3. **Watch the P2P coordination and L2 interactions**
 
+**⚙️ Configuration Modes**
+
+- **Mock Mode** (default): No API keys, full simulation
+- **Testnet Mode**: Connect to Optimism Goerli (requires test ETH)
+- **Production Mode**: Real mainnet integration (requires API keys)
+
+See [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) for detailed mode configuration.
+
 ### Configuration
 
 Edit `config/optimism_config.py` to set:
 - Optimism RPC endpoint
 - Contract addresses
 - Network parameters
+
+Copy `.env.example` to `.env` and configure for your desired mode.
 
 ## Use Cases
 
@@ -113,6 +127,22 @@ class MyDApp:
         # Optionally interact with L2
         pass
 ```
+
+## 📚 Documentation
+
+- **[PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)** - Complete project structure and development modes
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute to the project
+- **[docs/architecture.md](docs/architecture.md)** - Detailed system architecture
+- **[examples/](examples/)** - Working demo applications
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Development setup
+- Code style guidelines  
+- How to add new features
+- Testing procedures
+- Community guidelines
 
 ## License
 

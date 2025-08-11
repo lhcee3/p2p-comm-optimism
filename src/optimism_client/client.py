@@ -33,8 +33,17 @@ class OptimismClient:
         self.config = config
         self.w3 = Web3(Web3.HTTPProvider(config.rpc_url))
         
-        # Add PoA middleware for Optimism
-        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        # Add PoA middleware for Optimism (with error handling)
+        try:
+            # Try different import patterns for web3 middleware
+            try:
+                from web3.middleware import geth_poa_middleware
+                self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+            except ImportError:
+                from web3.middleware.proof_of_authority import geth_poa_middleware
+                self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        except Exception as e:
+            logger.warning(f"Could not add PoA middleware: {e}")
         
         # Set up account if private key is provided
         self.account = None
@@ -188,6 +197,11 @@ class OptimismClient:
         from_address: Optional[str] = None
     ) -> int:
         """Estimate gas for a transaction"""
+        # Mock mode for demo
+        if not await self._is_connected():
+            logger.info("Using mock gas estimate (21000) - not connected to RPC")
+            return 21000
+            
         transaction = {
             'to': to_checksum_address(to_address),
             'data': data,
@@ -199,13 +213,25 @@ class OptimismClient:
         elif self.account:
             transaction['from'] = self.account.address
         
-        loop = asyncio.get_event_loop()
-        gas_estimate = await loop.run_in_executor(
-            None,
-            lambda: self.w3.eth.estimate_gas(transaction)
-        )
-        
-        return gas_estimate
+        try:
+            loop = asyncio.get_event_loop()
+            gas_estimate = await loop.run_in_executor(
+                None,
+                lambda: self.w3.eth.estimate_gas(transaction)
+            )
+            return gas_estimate
+        except Exception as e:
+            logger.warning(f"Gas estimation failed: {e}, using default 21000")
+            return 21000
+    
+    async def _is_connected(self) -> bool:
+        """Check if we're connected to the network"""
+        try:
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, lambda: self.w3.eth.block_number)
+            return True
+        except Exception:
+            return False
     
     async def _get_gas_price(self) -> int:
         """Get current gas price"""
